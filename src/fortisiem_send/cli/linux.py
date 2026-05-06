@@ -2,16 +2,15 @@ from __future__ import annotations
 
 import argparse
 
+from ..ip_utils import parse_src_ip_mode
 from ..loaders import build_send_context
 from ..runner import run_sender
 from .common import (
-    add_context_overrides,
     add_network_args,
     add_repo_arg,
-    add_src_ip_args,
+    add_syslog_reporting_ip_arg,
     add_throughput_args,
     cli_main_wrapper,
-    context_kwargs_from_ns,
     resolve_repo_root,
 )
 
@@ -21,12 +20,19 @@ def _parse() -> argparse.Namespace:
     add_repo_arg(p)
     add_network_args(p)
     add_throughput_args(p)
-    add_src_ip_args(p)
-    add_context_overrides(p)
+    add_syslog_reporting_ip_arg(p)
+    p.add_argument("--src-ip-mode", default="random", type=parse_src_ip_mode)
+    p.add_argument("--attacker-ip", default="", help="IP en plantilla y origen UDP")
+    p.add_argument(
+        "--user-samaccountname",
+        default="",
+        help="Usuario en el mensaje; si lo pones, debe existir en config/users_ad.csv",
+    )
+    p.add_argument("--linux-asset-ip", default="", help="Equipo Linux en assets.csv")
     p.add_argument(
         "--category",
         default="ssh",
-        help="Categoría en plantillas (ssh, auth, sudo, ...)",
+        help="Categoría (ssh, auth, sudo, ...)",
     )
     p.add_argument("--event-hint", default="")
     return p.parse_args()
@@ -37,7 +43,10 @@ def _main() -> int:
     base = resolve_repo_root(ns)
     ctx = build_send_context(
         base,
-        **context_kwargs_from_ns(ns),
+        user_samaccountname=ns.user_samaccountname,
+        linux_asset_ip=ns.linux_asset_ip,
+        attacker_ip=ns.attacker_ip,
+        src_ip_mode=ns.src_ip_mode,
         active_sources=frozenset({"linux"}),
         run_label="linux",
     )
@@ -53,6 +62,7 @@ def _main() -> int:
         count=max(1, ns.count),
         rate=max(1, ns.rate),
         dry_run=ns.dry_run,
+        syslog_src_ip=ns.syslog_src_ip,
     )
     print(f"Done. run_id={ctx.run_id} events={total}")
     return 0

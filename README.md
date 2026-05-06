@@ -33,9 +33,17 @@ python3 -m fortisiem_send.cli.fortigate_vpn --help
 
 Por defecto se buscan `config/` y `log_repository/` en el **directorio actual**. Opcional: `--repo-root /ruta/al/repo` o `--config-dir /ruta/al/repo/config` (la raíz de datos será el directorio padre de `config/`).
 
-Flags comunes (todos los CLIs): `--target`, `--port`, `--syslog-hostname`, `--count`, `--rate`, `--dry-run`, `--src-ip-mode`, `--attacker-ip`, overrides de contexto (`--endpoint-ip`, `--user-samaccountname`, `--fortigate-devname`, `--vpn-remote-ip`, `--c2-ip`, etc.; ver `--help`).
+**Cada script tiene sus propios parámetros** (no comparten un mega `--help`). Comparten envío, rutas y **reporting IP del syslog**: `--repo-root`, `--config-dir`, `--target`, `--port`, `--syslog-hostname`, `--count`, `--rate`, `--dry-run`, **`--syslog-src-ip`** (IPv4 origen del paquete UDP hacia el collector; en FortiSIEM suele corresponder al *reporting IP* / IP vista por el parser; **no** sustituye los placeholders del cuerpo del evento — para eso siguen `--attacker-ip` y flags por fuente). El resto es por ejecutable; usa `send-… --help`.
 
-Solo **`send-fortigate-vpn`**: `--syslog-src-ip` fija la IPv4 de **origen del paquete UDP** hacia el SIEM sin cambiar el `src_ip` del cuerpo del log (para eso sigue valiendo `--attacker-ip`); si no la pones, el origen UDP es el mismo que la `src_ip` del render.
+| Script | Parámetros propios (además de los comunes y `--syslog-src-ip`; ver `--help`) |
+|--------|-------------------------------------------|
+| `send-fortigate-vpn` | `--src-ip-mode`, `--attacker-ip`, `--fortigate-devname`, `--fortigate-serial`, **`--vpn-remote-ip`** (solo VPN / `remip`), `--user-samaccountname`, `--event-hint` |
+| `send-fortigate-traffic` | `--src-ip-mode`, `--attacker-ip`, `--fortigate-devname`, `--fortigate-serial`, `--c2-ip`, `--c2-domain`, `--event-hint` |
+| `send-fortiedr` | `--src-ip-mode`, `--attacker-ip`, `--user-samaccountname`, `--endpoint-ip`, `--initial-asset-ip`, `--initial-asset-hostname`, `--hostname`, `--category`, `--event-hint` |
+| `send-vmware` | `--src-ip-mode`, `--attacker-ip`, `--vmware-user`, `--vmware-asset-ip`, `--category`, `--event-hint` |
+| `send-windows` | `--src-ip-mode`, `--attacker-ip`, `--user-samaccountname`, `--endpoint-ip`, `--initial-asset-ip`, `--initial-asset-hostname`, `--hostname`, `--lateral-asset-ip`, `--category`, `--event-hint` |
+| `send-linux` | `--src-ip-mode`, `--attacker-ip`, `--user-samaccountname`, `--linux-asset-ip`, `--category`, `--event-hint` |
+| `send-fortimail` | `--src-ip-mode`, `--attacker-ip`, `--user-samaccountname`, `--c2-domain`, `--category`, `--event-hint` |
 
 ### Ejemplos
 
@@ -45,7 +53,7 @@ FortiGate VPN (categoría fija `vpn`):
 send-fortigate-vpn --dry-run --count 5 --event-hint "tunnel"
 ```
 
-Origen UDP distinto al `src_ip` del mensaje (solo este CLI):
+Reporting IP (origen UDP) distinto del `src_ip` del mensaje (cualquier CLI; ejemplo VPN con `remip`):
 
 ```bash
 send-fortigate-vpn --dry-run --count 1 \

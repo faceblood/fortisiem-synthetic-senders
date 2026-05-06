@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from ..constants import DEFAULT_PORT, DEFAULT_RATE, DEFAULT_TARGET
-from ..ip_utils import parse_src_ip_mode
+from ..ip_utils import parse_syslog_src_ip
 
 
 def resolve_repo_root(ns: argparse.Namespace) -> Path:
@@ -47,52 +47,18 @@ def add_throughput_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--dry-run", action="store_true", help="Solo imprime el mensaje, no envía UDP")
 
 
-def add_src_ip_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--src-ip-mode", default="random", type=parse_src_ip_mode)
+def add_syslog_reporting_ip_arg(parser: argparse.ArgumentParser) -> None:
+    """Origen L3 del UDP syslog; en FortiSIEM suele alinearse con reporting IP / IP vista por el collector."""
     parser.add_argument(
-        "--attacker-ip",
+        "--syslog-src-ip",
         default="",
-        help="IP en contexto de plantilla (p.ej. src_ip) y origen del paquete UDP salvo que el CLI exponga otro flag",
+        type=parse_syslog_src_ip,
+        metavar="IPv4",
+        help=(
+            "Reporting IP: IPv4 origen del paquete syslog hacia --target (no cambia placeholders del cuerpo; "
+            "usa --attacker-ip u otros flags según la fuente). Si se omite, origen UDP = src_ip del render"
+        ),
     )
-
-
-def context_kwargs_from_ns(ns: argparse.Namespace) -> dict:
-    """Map shared CLI namespace fields into build_send_context keyword args."""
-    return {
-        "user_samaccountname": ns.user_samaccountname,
-        "vmware_user_spec": ns.vmware_user,
-        "endpoint_ip": ns.endpoint_ip,
-        "initial_asset_ip": ns.initial_asset_ip,
-        "initial_asset_hostname": ns.initial_asset_hostname,
-        "lateral_asset_ip": ns.lateral_asset_ip,
-        "vmware_asset_ip": ns.vmware_asset_ip,
-        "linux_asset_ip": ns.linux_asset_ip,
-        "fortigate_devname": ns.fortigate_devname,
-        "fortigate_serial": ns.fortigate_serial,
-        "hostname": ns.hostname,
-        "attacker_ip": ns.attacker_ip,
-        "src_ip_mode": ns.src_ip_mode,
-        "vpn_remote_ip": ns.vpn_remote_ip,
-        "c2_ip": ns.c2_ip,
-        "c2_domain": ns.c2_domain,
-    }
-
-
-def add_context_overrides(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--endpoint-ip", default="", help="IP del endpoint Windows (sintético si no está en assets)")
-    parser.add_argument("--initial-asset-ip", default="")
-    parser.add_argument("--initial-asset-hostname", default="")
-    parser.add_argument("--hostname", default="", help="Hostname personalizado (no FortiGate)")
-    parser.add_argument("--lateral-asset-ip", default="")
-    parser.add_argument("--vmware-asset-ip", default="")
-    parser.add_argument("--linux-asset-ip", default="")
-    parser.add_argument("--user-samaccountname", default="")
-    parser.add_argument("--vmware-user", default="")
-    parser.add_argument("--fortigate-devname", default="")
-    parser.add_argument("--fortigate-serial", default="")
-    parser.add_argument("--vpn-remote-ip", default="")
-    parser.add_argument("--c2-ip", default="")
-    parser.add_argument("--c2-domain", default="")
 
 
 def cli_main_wrapper(entry_fn) -> int:
