@@ -49,7 +49,11 @@ def add_throughput_args(parser: argparse.ArgumentParser) -> None:
 
 def add_src_ip_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--src-ip-mode", default="random", type=parse_src_ip_mode)
-    parser.add_argument("--attacker-ip", default="", help="Fuerza IP de origen en el paquete y contexto")
+    parser.add_argument(
+        "--attacker-ip",
+        default="",
+        help="IP en contexto de plantilla (p.ej. src_ip) y origen del paquete UDP salvo que el CLI exponga otro flag",
+    )
 
 
 def context_kwargs_from_ns(ns: argparse.Namespace) -> dict:

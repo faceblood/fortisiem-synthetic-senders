@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 
+from ..ip_utils import parse_syslog_src_ip
 from ..loaders import build_send_context
 from ..runner import run_sender
 from .common import (
@@ -23,6 +24,13 @@ def _parse() -> argparse.Namespace:
     add_throughput_args(p)
     add_src_ip_args(p)
     add_context_overrides(p)
+    p.add_argument(
+        "--syslog-src-ip",
+        default="",
+        type=parse_syslog_src_ip,
+        metavar="IPv4",
+        help="Solo envío UDP: IPv4 origen del paquete hacia --target (el cuerpo del log sigue usando --attacker-ip / render)",
+    )
     p.add_argument(
         "--event-hint",
         default="",
@@ -52,6 +60,7 @@ def _main() -> int:
         count=max(1, ns.count),
         rate=max(1, ns.rate),
         dry_run=ns.dry_run,
+        syslog_src_ip=ns.syslog_src_ip,
     )
     print(f"Done. run_id={ctx.run_id} events={total}")
     return 0

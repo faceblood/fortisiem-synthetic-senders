@@ -25,6 +25,7 @@ def run_sender(
     count: int,
     rate: int,
     dry_run: bool,
+    syslog_src_ip: str = "",
 ) -> int:
     if templates is None:
         templates = load_templates(base)
@@ -43,7 +44,10 @@ def run_sender(
         wire = format_rfc3164(syslog_hostname, raw)
         print(raw)
         if not dry_run:
-            send_syslog_scapy(target, port, wire, src_ip=src_ip)
+            packet_src = syslog_src_ip.strip() if syslog_src_ip.strip() else src_ip
+            if isinstance(packet_src, str) and not packet_src.strip():
+                packet_src = None
+            send_syslog_scapy(target, port, wire, src_ip=packet_src)
         sent += 1
         time.sleep(rate_sleep)
     return sent

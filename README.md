@@ -35,12 +35,21 @@ Por defecto se buscan `config/` y `log_repository/` en el **directorio actual**.
 
 Flags comunes (todos los CLIs): `--target`, `--port`, `--syslog-hostname`, `--count`, `--rate`, `--dry-run`, `--src-ip-mode`, `--attacker-ip`, overrides de contexto (`--endpoint-ip`, `--user-samaccountname`, `--fortigate-devname`, `--vpn-remote-ip`, `--c2-ip`, etc.; ver `--help`).
 
+Solo **`send-fortigate-vpn`**: `--syslog-src-ip` fija la IPv4 de **origen del paquete UDP** hacia el SIEM sin cambiar el `src_ip` del cuerpo del log (para eso sigue valiendo `--attacker-ip`); si no la pones, el origen UDP es el mismo que la `src_ip` del render.
+
 ### Ejemplos
 
 FortiGate VPN (categoría fija `vpn`):
 
 ```bash
 send-fortigate-vpn --dry-run --count 5 --event-hint "tunnel"
+```
+
+Origen UDP distinto al `src_ip` del mensaje (solo este CLI):
+
+```bash
+send-fortigate-vpn --dry-run --count 1 \
+  --attacker-ip 10.0.0.1 --vpn-remote-ip 10.0.0.2 --syslog-src-ip 192.0.2.88
 ```
 
 FortiGate tráfico (`traffic`):

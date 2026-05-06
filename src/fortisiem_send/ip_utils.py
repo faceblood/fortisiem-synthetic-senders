@@ -7,6 +7,20 @@ import random
 from .models import Asset
 
 
+def parse_syslog_src_ip(value: str) -> str:
+    """IPv4 for UDP packet source toward the SIEM; empty = use render src_ip."""
+    if value is None or not str(value).strip():
+        return ""
+    candidate = str(value).strip()
+    try:
+        ipaddress.IPv4Address(candidate)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "syslog-src-ip debe ser una IPv4 válida (o omitir el flag)"
+        ) from exc
+    return candidate
+
+
 def parse_src_ip_mode(value: str) -> str:
     candidate = value.strip()
     if candidate in {"random", "asset"}:
