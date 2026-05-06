@@ -95,6 +95,25 @@ send-fortimail --dry-run --count 2
 - `src/fortisiem_send/`: paquete compartido (carga CSV, plantillas, render, syslog Scapy).
 - `config/`, `log_repository/`: datos y plantillas (las carpetas `campaigns/` se ignoran al cargar plantillas).
 
+## Proyecto Git aparte (otra cuenta u organización)
+
+Este directorio es un **repositorio Git independiente** (`git init` en la raíz, rama `main`). No depende de que vivas dentro del repo CSIRT: puedes **moverlo o clonarlo** a otra ruta (por ejemplo `~/Projects/fortisiem-synthetic-senders`) y seguir trabajando igual.
+
+Para publicarlo en GitHub **con otra cuenta** (no la que usas por defecto en el Mac):
+
+1. Crea en esa cuenta un repo **vacío** (sin README) con el nombre que quieras.
+2. En esta carpeta, ajusta autor si hace falta: `git config user.name "…"` y `git config user.email "…"` (local, sin `--global`, solo para este repo).
+3. Añade el remoto y sube:
+
+   ```bash
+   git remote add origin https://github.com/OTRA-CUENTA/fortisiem-synthetic-senders.git
+   git push -u origin main
+   ```
+
+   Con **SSH** y una clave asociada a la otra cuenta: `git remote add origin git@github.com:OTRA-CUENTA/fortisiem-synthetic-senders.git`.
+
+Si el repo CSIRT también es Git y no quieres un “repo dentro del repo”, añade `fortisiem-synthetic-senders/` al `.gitignore` del padre o mueve esta carpeta fuera del árbol CSIRT.
+
 ## Licencia / procedencia
 
 Lógica y plantillas derivadas del proyecto interno de campañas FortiSIEM; este repo es un troceo operativo por fuente.
