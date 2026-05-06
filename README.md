@@ -1,5 +1,7 @@
 # fortisiem-synthetic-senders
 
+[![CI](https://github.com/faceblood/fortisiem-synthetic-senders/actions/workflows/ci.yml/badge.svg)](https://github.com/faceblood/fortisiem-synthetic-senders/actions/workflows/ci.yml)
+
 Herramientas **por fuente** para generar y enviar syslog sintético orientado a FortiSIEM. Este repo contiene las mismas plantillas (`log_repository/`) y datos (`config/`) que el proyecto de campañas, pero **sin** CSV de campañas, `--campaign`, ni pasos encadenados: cada ejecutable solo cubre una fuente y categoría acotada.
 
 ## Requisitos
